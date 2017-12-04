@@ -335,9 +335,8 @@ complicated.
 | `deregisterInputEventHandler(evtType: string, handler: EventListener) => void` | Deregisters an event listener on the input element for a given event |
 | `registerBottomLineEventHandler(evtType: string, handler: EventListener) => void` | Registers an event listener on the bottom line element for a given event |
 | `deregisterBottomLineEventHandler(evtType: string, handler: EventListener) => void` | Deregisters an event listener on the bottom line element for a given event |
-| `getBottomLineFoundation() => MDCTextFieldBottomLineFoundation` | Returns the instance of the bottom line element's foundation |
-| `getHelperTextFoundation() => MDCTextFieldHelperTextFoundation` | Returns the instance of the helper text element's foundation |
-| `getInputFoundation() => MDCTextFieldInputFoundation` | Returns the instance of the input element's foundation |
+
+MDC TextField has multiple sub-elements: input, bottom line, and helper text. The foundations of these sub-elements must be passed in as constructor arguments for the MDC TextField foundation. Since the MDCTextField component takes care of creating its foundation, we need to pass sub-element foundations through the MDCTextField component. This is typically done in the component's implementation of `getDefaultFoundation()`.
 
 #### The full foundation API
 
