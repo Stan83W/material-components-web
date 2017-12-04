@@ -18,6 +18,7 @@
 import MDCFoundation from '@material/base/foundation';
 import {MDCTextFieldAdapter} from './adapter';
 import MDCTextFieldBottomLineFoundation from './bottom-line/foundation';
+import MDCTextFieldHelperTextFoundation from './helper-text/foundation';
 import MDCTextFieldInputFoundation from './input/foundation';
 import {cssClasses, strings} from './constants';
 
@@ -57,17 +58,25 @@ class MDCTextFieldFoundation extends MDCFoundation {
       deregisterInputEventHandler: () => {},
       registerBottomLineEventHandler: () => {},
       deregisterBottomLineEventHandler: () => {},
-      getBottomLineFoundation: () => {},
-      getHelperTextFoundation: () => {},
-      getInputFoundation: () => {},
     });
   }
 
   /**
    * @param {!MDCTextFieldAdapter=} adapter
+   * @param {!MDCTextFieldBottomLineFoundation=} bottomLineFoundation
+   * @param {!MDCTextFieldHelperTextFoundation=} helperTextFoundation
+   * @param {!MDCTextFieldInputFoundation=} inputFoundation
    */
-  constructor(adapter = /** @type {!MDCTextFieldAdapter} */ ({})) {
+  constructor(adapter = /** @type {!MDCTextFieldAdapter} */ ({}),
+              bottomLineFoundation, helperTextFoundation, inputFoundation) {
     super(Object.assign(MDCTextFieldFoundation.defaultAdapter, adapter));
+
+    /** @type {?MDCTextFieldBottomLineFoundation} */
+    this.bottomLine_ = bottomLineFoundation;
+    /** @type {?MDCTextFieldHelperTextFoundation} */
+    this.helperText_ = helperTextFoundation;
+    /** @type {?MDCTextFieldInputFoundation} */
+    this.input_ = inputFoundation;
 
     /** @private {boolean} */
     this.isFocused_ = false;
@@ -88,8 +97,7 @@ class MDCTextFieldFoundation extends MDCFoundation {
   init() {
     this.adapter_.addClass(MDCTextFieldFoundation.cssClasses.UPGRADED);
     // Ensure label does not collide with any pre-filled value.
-    const input = this.adapter_.getInputFoundation();
-    if (input.getValue()) {
+    if (this.input_.getValue()) {
       this.adapter_.addClassToLabel(MDCTextFieldFoundation.cssClasses.LABEL_FLOAT_ABOVE);
     }
 
@@ -129,8 +137,7 @@ class MDCTextFieldFoundation extends MDCFoundation {
     if (this.isDisabled()) {
       return;
     }
-    const input = this.adapter_.getInputFoundation();
-    input.handleTextFieldInteraction();
+    this.input_.handleTextFieldInteraction();
 
     const {target, type} = evt;
     const {TEXT_FIELD_ICON} = MDCTextFieldFoundation.cssClasses;
@@ -148,15 +155,13 @@ class MDCTextFieldFoundation extends MDCFoundation {
   activateFocus() {
     const {FOCUSED, LABEL_FLOAT_ABOVE, LABEL_SHAKE} = MDCTextFieldFoundation.cssClasses;
     this.adapter_.addClass(FOCUSED);
-    const bottomLine = this.adapter_.getBottomLineFoundation();
-    if (bottomLine) {
-      bottomLine.activate();
+    if (this.bottomLine_) {
+      this.bottomLine_.activate();
     }
     this.adapter_.addClassToLabel(LABEL_FLOAT_ABOVE);
     this.adapter_.removeClassFromLabel(LABEL_SHAKE);
-    const helperText = this.adapter_.getHelperTextFoundation();
-    if (helperText) {
-      helperText.showToScreenReader();
+    if (this.helperText_) {
+      this.helperText_.showToScreenReader();
     }
     this.isFocused_ = true;
   }
@@ -167,9 +172,8 @@ class MDCTextFieldFoundation extends MDCFoundation {
    * @param {!Event} evt
    */
   setBottomLineTransformOrigin(evt) {
-    const bottomLine = this.adapter_.getBottomLineFoundation();
-    if (bottomLine) {
-      bottomLine.setTransformOrigin(evt);
+    if (this.bottomLine_) {
+      this.bottomLine_.setTransformOrigin(evt);
     }
   }
 
@@ -178,12 +182,11 @@ class MDCTextFieldFoundation extends MDCFoundation {
    * for animations to finish.
    */
   handleBottomLineAnimationEnd() {
-    const bottomLine = this.adapter_.getBottomLineFoundation();
     // We need to wait for the bottom line to be entirely transparent
     // before removing the class. If we do not, we see the line start to
     // scale down before disappearing
-    if (!this.isFocused_ && bottomLine) {
-      bottomLine.deactivate();
+    if (!this.isFocused_ && this.bottomLine_) {
+      this.bottomLine_.deactivate();
     }
   }
 
@@ -192,18 +195,17 @@ class MDCTextFieldFoundation extends MDCFoundation {
    */
   deactivateFocus() {
     const {FOCUSED, LABEL_FLOAT_ABOVE, LABEL_SHAKE} = MDCTextFieldFoundation.cssClasses;
-    const input = this.adapter_.getInputFoundation();
 
     this.isFocused_ = false;
     this.adapter_.removeClass(FOCUSED);
     this.adapter_.removeClassFromLabel(LABEL_SHAKE);
 
-    if (!input.getValue() && !this.isBadInput_()) {
+    if (!this.input_.getValue() && !this.isBadInput_()) {
       this.adapter_.removeClassFromLabel(LABEL_FLOAT_ABOVE);
     }
 
     if (!this.useCustomValidityChecking_) {
-      this.changeValidity_(input.checkValidity());
+      this.changeValidity_(this.input_.checkValidity());
     }
   }
 
@@ -220,9 +222,8 @@ class MDCTextFieldFoundation extends MDCFoundation {
       this.adapter_.addClassToLabel(LABEL_SHAKE);
       this.adapter_.addClass(INVALID);
     }
-    const helperText = this.adapter_.getHelperTextFoundation();
-    if (helperText) {
-      helperText.setValidity(isValid);
+    if (this.helperText_) {
+      this.helperText_.setValidity(isValid);
     }
   }
 
@@ -231,16 +232,14 @@ class MDCTextFieldFoundation extends MDCFoundation {
    * @private
    */
   isBadInput_() {
-    const input = this.adapter_.getInputFoundation();
-    return input.isBadInput();
+    return this.input_.isBadInput();
   }
 
   /**
    * @return {boolean} True if the Text Field is disabled.
    */
   isDisabled() {
-    const input = this.adapter_.getInputFoundation();
-    return input.isDisabled();
+    return this.input_.isDisabled();
   }
 
   /**
@@ -248,8 +247,7 @@ class MDCTextFieldFoundation extends MDCFoundation {
    */
   setDisabled(disabled) {
     const {DISABLED, INVALID} = MDCTextFieldFoundation.cssClasses;
-    const input = this.adapter_.getInputFoundation();
-    input.setDisabled(disabled);
+    this.input_.setDisabled(disabled);
     if (disabled) {
       this.adapter_.addClass(DISABLED);
       this.adapter_.removeClass(INVALID);
@@ -264,9 +262,8 @@ class MDCTextFieldFoundation extends MDCFoundation {
    * @param {string} content Sets the content of the helper text.
    */
   setHelperTextContent(content) {
-    const helperText = this.adapter_.getHelperTextFoundation();
-    if (helperText) {
-      helperText.setContent(content);
+    if (this.helperText_) {
+      this.helperText_.setContent(content);
     }
   }
 
