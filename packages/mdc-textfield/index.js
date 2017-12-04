@@ -18,6 +18,7 @@
 import MDCComponent from '@material/base/component';
 import {MDCRipple} from '@material/ripple';
 
+/* eslint-disable no-unused-vars */
 import {cssClasses, strings} from './constants';
 import {MDCTextFieldAdapter} from './adapter';
 import MDCTextFieldFoundation from './foundation';
@@ -142,6 +143,9 @@ class MDCTextField extends MDCComponent {
    */
   getDefaultFoundation() {
     return new MDCTextFieldFoundation(
+      this.getInputFoundation_(),
+      this.getBottomLineFoundation_(),
+      this.getHelperTextFoundation_(),
       /** @type {!MDCTextFieldAdapter} */ (Object.assign({
         addClass: (className) => this.root_.classList.add(className),
         removeClass: (className) => this.root_.classList.remove(className),
@@ -174,17 +178,21 @@ class MDCTextField extends MDCComponent {
           }
         },
       },
-      this.getIconAdapterMethods_())),
-      this.getBottomLineFoundation_(),
-      this.getHelperTextFoundation_(),
-      this.getInputFoundation_(),
-    );
+      this.getIconAdapterMethods_())));
+  }
+
+  /**
+   * Returns the foundation for the input element.
+   * @return {!MDCTextFieldInputFoundation}
+   */
+  getInputFoundation_() {
+    return this.input_.foundation;
   }
 
   /**
    * Returns the foundation for the bottom line element. Returns undefined if
    * there is no bottom line element.
-   * @return {?MDCTextFieldBottomLineFoundation}
+   * @return {!MDCTextFieldBottomLineFoundation|undefined}
    */
   getBottomLineFoundation_() {
     if (this.bottomLine_) {
@@ -196,21 +204,13 @@ class MDCTextField extends MDCComponent {
   /**
    * Returns the foundation for the helper text element. Returns undefined if
    * there is no helper text element.
-   * @return {?MDCTextFieldHelperTextFoundation}
+   * @return {!MDCTextFieldHelperTextFoundation|undefined}
    */
   getHelperTextFoundation_() {
     if (this.helperText_) {
       return this.helperText_.foundation;
     }
     return undefined;
-  }
-
-  /**
-   * Returns the foundation for the input element.
-   * @return {!MDCTextFieldInputFoundation}
-   */
-  getInputFoundation_() {
-    return this.input_.foundation;
   }
 
   /**

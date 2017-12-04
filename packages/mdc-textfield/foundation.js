@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-unused-vars */
 import MDCFoundation from '@material/base/foundation';
 import {MDCTextFieldAdapter} from './adapter';
 import MDCTextFieldBottomLineFoundation from './bottom-line/foundation';
@@ -62,21 +63,21 @@ class MDCTextFieldFoundation extends MDCFoundation {
   }
 
   /**
-   * @param {!MDCTextFieldAdapter=} adapter
+   * @param {!MDCTextFieldInputFoundation} inputFoundation
    * @param {!MDCTextFieldBottomLineFoundation=} bottomLineFoundation
    * @param {!MDCTextFieldHelperTextFoundation=} helperTextFoundation
-   * @param {!MDCTextFieldInputFoundation=} inputFoundation
+   * @param {!MDCTextFieldAdapter=} adapter
    */
-  constructor(adapter = /** @type {!MDCTextFieldAdapter} */ ({}),
-              bottomLineFoundation, helperTextFoundation, inputFoundation) {
+  constructor(inputFoundation, bottomLineFoundation, helperTextFoundation,
+    adapter = /** @type {!MDCTextFieldAdapter} */ ({})) {
     super(Object.assign(MDCTextFieldFoundation.defaultAdapter, adapter));
 
-    /** @type {?MDCTextFieldBottomLineFoundation} */
-    this.bottomLine_ = bottomLineFoundation;
-    /** @type {?MDCTextFieldHelperTextFoundation} */
-    this.helperText_ = helperTextFoundation;
-    /** @type {?MDCTextFieldInputFoundation} */
+    /** @type {!MDCTextFieldInputFoundation} */
     this.input_ = inputFoundation;
+    /** @type {!MDCTextFieldBottomLineFoundation|undefined} */
+    this.bottomLine_ = bottomLineFoundation;
+    /** @type {!MDCTextFieldHelperTextFoundation|undefined} */
+    this.helperText_ = helperTextFoundation;
 
     /** @private {boolean} */
     this.isFocused_ = false;
